@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Conta de Água</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .form-group button {
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .form-group button:hover {
+            background-color: #218838;
+        }
+        .result {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Calculadora de Conta de Água</h1>
+        <form id="waterForm">
+            <div class="form-group">
+                <label for="VlmCagepa">Valor em reais do m³ cobrado pela Cagepa:</label>
+                <input type="number" id="VlmCagepa" name="VlmCagepa" step="any" required>
+            </div>
+            <div class="form-group">
+                <label for="QtmCobrCagepa">Quantidade de m³ registrado pela Cagepa no mês:</label>
+                <input type="number" id="QtmCobrCagepa" name="QtmCobrCagepa" step="any" required>
+            </div>
+            <div class="form-group">
+                <label for="QtmUtilizadoTodosAPs">Quantidade de m³ utilizados pelos apartamentos:</label>
+                <input type="number" id="QtmUtilizadoTodosAPs" name="QtmUtilizadoTodosAPs" step="any" required>
+            </div>
+            <div class="form-group">
+                <button type="submit">Calcular</button>
+            </div>
+        </form>
+        <div class="result" id="result">
+            <!-- Resultados serão exibidos aqui -->
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('waterForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Evita o envio do formulário
+
+            // Coleta os valores inseridos
+            const VlmCagepa = parseFloat(document.getElementById('VlmCagepa').value);
+            let QtmCobrCagepa = parseFloat(document.getElementById('QtmCobrCagepa').value);
+            const QtmUtilizadoTodosAPs = parseFloat(document.getElementById('QtmUtilizadoTodosAPs').value);
+
+            // Calcula o valor da conta de água da Cagepa
+            let VlCobrCagepa;
+            if (QtmCobrCagepa >= 3240) {
+                VlCobrCagepa = VlmCagepa * QtmCobrCagepa;
+            } else {
+                QtmCobrCagepa = 3240;
+                VlCobrCagepa = VlmCagepa * QtmCobrCagepa;
+            }
+
+            // Calcula a quantidade de m³ utilizados na área comum
+            const QtmUtilizadoAreaComum = QtmCobrCagepa - QtmUtilizadoTodosAPs;
+
+            // Calcula o valor da conta de água da área comum
+            const VlCobrAreaComum = QtmUtilizadoAreaComum * VlmCagepa;
+
+            // Calcula o valor do rateio da área comum
+            const VlRateioAreaComum = VlCobrAreaComum / 324;
+
+            // Calcula o valor dos apartamentos sem rateio
+            const VlCobrApartamentosSemRateio = VlCobrCagepa - VlCobrAreaComum;
+
+            // Calcula o valor do m³ para os apartamentos sem rateio
+            const VlmApartamentosSemRateio = VlCobrApartamentosSemRateio / QtmUtilizadoTodosAPs;
+
+            // Exibe os valores e o rateio no elemento de resultado
+            document.getElementById('result').innerHTML = `
+                <h2>Valores Calculados:</h2>
+                <p><strong>Valor em reais do m³ cobrado pela Cagepa:</strong> R$ ${VlmCagepa.toFixed(2)}</p>
+                <p><strong>Quantidade de m³ registrado pela Cagepa no mês:</strong> ${QtmCobrCagepa.toFixed(2)} m³</p>
+                <p><strong>Valor da conta de água do FIT Total (comum + apartamentos):</strong> R$ ${VlCobrCagepa.toFixed(2)}</p>
+                <p><strong>Quantidade de m³ utilizados pelos apartamentos:</strong> ${QtmUtilizadoTodosAPs.toFixed(2)} m³</p>
+                <p><strong>Quantidade de m³ utilizados na área comum:</strong> ${QtmUtilizadoAreaComum.toFixed(2)} m³</p>
+                <p><strong>Valor da conta de água da área comum:</strong> R$ ${VlCobrAreaComum.toFixed(2)}</p>
+                <p><strong>Valor do rateio da conta da área comum:</strong> R$ ${VlRateioAreaComum.toFixed(2)}</p>
+                <p><strong>Valor do m³ para apartamentos sem rateio:</strong> R$ ${VlmApartamentosSemRateio.toFixed(2)}</p>
+                <p><strong>Ou seja:</strong> 324 x R$ ${VlRateioAreaComum.toFixed(2)} + R$ ${VlmApartamentosSemRateio.toFixed(2)} x ${QtmUtilizadoTodosAPs.toFixed(2)} = R$ ${VlCobrCagepa.toFixed(2)}</p>
+            `;
+        });
+    </script>
+</body>
+</html>
